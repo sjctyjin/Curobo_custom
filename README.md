@@ -12,19 +12,40 @@ its affiliates is strictly prohibited.
 ```bat
 1. 建構一個python3.10的虛擬環境
 python -m venv venv310
+2.確認C++編譯環境是VS2019 MSVC  v142
+開啟Visual Studio 2022/2019 installer
+按修改
+右邊安裝詳細資料列表中找到 "使用C++的桌面開發"
+勾選 "MSVC v142 - VS 2019 C++ x64/x86 建置工具(v14.29)" ，如下圖
+後執行安裝。
+ 
+Call 2019的C++編譯環境
+@echo off
+REM === Step 1: 載入 Visual Studio v142 編譯器環境 ===
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 
-2. 啟動python3.10環境
+REM === Step 2: 設定 CUDA 11.8 環境變數 ===
+set CUDA_HOME=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
+set PATH=%CUDA_HOME%\bin;%PATH%
+echo CUDA_HOME is set to: %CUDA_HOME%
+
+REM === Step 3: 告訴 pip 不要自己亂開VC環境
+set DISTUTILS_USE_SDK=1
+
+REM === Step 4: 啟動 Python 虛擬環境 venv310 ===
+call C:\Users\User\Downloads\isaac-sim-4.2\venv310\Scripts\activate.bat
+
+REM === Step 5: 顯示提示
+echo.
+echo ✅ 環境設定完成！你可以開始編譯了！
+cmd /k
+2. 在此C++編譯環境下啟動python3.10環境
 venv310\scripts\activate
-
 python -m pip install wheel
-
-
 3. 安裝CUDA 11.8
 https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local
-
 安裝cudnn
 https://developer.nvidia.com/rdp/cudnn-archive
-
 4.在虛擬環境下設定CUDA_HOME(要先完成第三步)
 
 $env:CUDA_HOME="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
@@ -34,30 +55,22 @@ echo $env:CUDA_HOME
 5.安裝pytorch 2.2版本
 # CUDA 11.8
 pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
-
-6.確認C++編譯環境是VS2022 MSVC (14.42) v142
-
-開啟Visual Studio 2022/2019 installer
-
-按修改
-
-右邊安裝詳細資料列表中找到 "使用C++的桌面開發"
-
-勾選 "MSVC v142 - VS 2019 C++ x64/x86 建置工具(v14.29)"
-
-後執行安裝。
-
-並在
 6. 執行curobo安裝
 cd curobo
 python -m pip install -e .[isaacsim] --no-build-isolation
 
+# 執行範例
+# IK碰撞球範圍 https://curobo.org/get_started/2b_isaacsim_examples.html
+
 python examples/isaac_sim/ik_reachability.py --robot piper.yml --visualize_spheres
 
+# motion軌跡規劃 https://curobo.org/get_started/2b_isaacsim_examples.html
 python examples/isaac_sim/motion_gen_reacher.py --robot piper.yml --visualize_spheres
 
+# MPC軌跡規劃 https://curobo.org/get_started/2b_isaacsim_examples.html
 python examples/isaac_sim/mpc_example.py --robot piper.yml --visualize_spheres
 
+# MPC軌跡規劃 發布關節值到ROS2主機
 python examples/isaac_sim/mpc_example.py --robot piper.yml --enable_rosbridge --rosbridge_host 192.168.3.125
 
 ```
