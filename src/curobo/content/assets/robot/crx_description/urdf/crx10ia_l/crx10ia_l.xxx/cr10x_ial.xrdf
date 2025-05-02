@@ -1,0 +1,93 @@
+format: "xrdf"
+
+format_version: 1.0
+
+default_joint_positions: 
+  J1: 0.0
+  J2: 0.0
+  J3: 0.0
+  J4: 1e-04
+  J5: 0.0
+  J6: -0.0
+
+cspace: 
+  joint_names: 
+    - "J1"
+    - "J2"
+    - "J3"
+    - "J4"
+    - "J5"
+    - "J6"
+  acceleration_limits: [10, 10, 10, 10, 10, 10]
+  jerk_limits: [10000, 10000, 10000, 10000, 10000, 10000]
+
+collision: 
+  geometry: "auto_generated_collision_sphere_group"
+
+self_collision: 
+  geometry: "auto_generated_collision_sphere_group"
+  ignore: 
+    base_link: 
+      - "link_1"
+      - "fanuc_world"
+    link_1: 
+      - "link_2"
+      - "fanuc_world"
+    link_2: 
+      - "link_3"
+    link_3: 
+      - "link_4"
+    link_4: 
+      - "link_5"
+    link_5: 
+      - "link_6"
+    link_6: 
+      - "flange"
+    flange: 
+      - "tcp"
+
+geometry: 
+  auto_generated_collision_sphere_group: 
+    spheres: 
+      link_1: 
+        - center: [0.0, 0.0, 0.0]
+          radius: 0.1
+        - center: [-0.0, -0.017, 0.117]
+          radius: 0.1
+      link_2: 
+        - center: [0.0, -0.196, 0.0]
+          radius: 0.1
+        - center: [-0.0, -0.197, 0.697]
+          radius: 0.1
+        - center: [-0.0, -0.196, 0.139]
+          radius: 0.1
+        - center: [-0.0, -0.196, 0.279]
+          radius: 0.1
+        - center: [-0.0, -0.197, 0.418]
+          radius: 0.1
+        - center: [-0.0, -0.197, 0.558]
+          radius: 0.1
+      link_3: 
+        - center: [0.0, 0.0, 0.0]
+          radius: 0.1
+        - center: [0.052, 0.0, 0.0]
+          radius: 0.1
+      link_4: 
+        - center: [-0.332, -0.0, -0.0]
+          radius: 0.06
+        - center: [0.0, 0.0, 0.0]
+          radius: 0.06
+        - center: [-0.266, -0.0, -0.0]
+          radius: 0.06
+        - center: [-0.199, -0.0, -0.0]
+          radius: 0.06
+        - center: [-0.133, -0.0, -0.0]
+          radius: 0.06
+        - center: [-0.066, -0.0, -0.0]
+          radius: 0.06
+      link_5: 
+        - center: [0.019, 0.009, -0.006]
+          radius: 0.08
+      link_6: 
+        - center: [-0.028, -0.0, 0.0]
+          radius: 0.05

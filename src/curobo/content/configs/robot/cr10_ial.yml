@@ -1,0 +1,130 @@
+##
+## Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+##
+## NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+## property and proprietary rights in and to this material, related
+## documentation and any modifications thereto. Any use, reproduction,
+## disclosure or distribution of this material and related documentation
+## without an express license agreement from NVIDIA CORPORATION or
+## its affiliates is strictly prohibited.
+##
+
+robot_cfg:
+  kinematics:
+    use_usd_kinematics: False  # 添加此参数
+    usd_path: Null 
+    usd_robot_root: "/robot"
+    isaac_usd_path: ""
+    # usd_flip_joints: {
+    #    "joint1",  # 尝试翻转第一个关节方向
+    #    "joint2",
+    #    "joint3",
+    #    "joint4": "Z",
+    #    "joint5": "Z",
+    #   "joint6"
+    # }
+    # usd_flip_joints: {
+    #    "joint1": "Z",  # 尝试翻转第一个关节方向
+    #    "joint2": "Z",
+    #    "joint3": "Z",
+    #    "joint4": "Z",
+    #    "joint5": "Z",
+    #   "joint6": "Z"
+    # }
+    usd_flip_joint_limits: []
+
+    urdf_path: "robot/crx_description/crx10ia_l.xx.urdf"
+    asset_root_path: "robot/crx_description"
+    
+    base_link: "base_link"
+    ee_link: "link_6"
+    #link_names: null
+    #lock_joints: {"joint7": 0.0}
+    
+    extra_links: null
+
+    
+    collision_link_names: ['link_1','link_2', 'link_3', 'link_4', 
+    'link_5' ,'link_6'] # List[str]
+    collision_spheres:
+      link_1:
+        - "center": [0.0, 0.0, 0.0]
+          "radius": 0.05
+        - "center": [-0.0, -0.017, 0.117]
+          "radius": 0.1
+      link_2:
+        - "center": [0.0, -0.196, 0.0]
+          "radius": 0.1
+        - "center": [-0.0, -0.197, 0.697]
+          "radius": 0.1
+        - "center": [-0.0, -0.196, 0.139]
+          "radius": 0.1
+        - "center": [-0.0, -0.196, 0.279]
+          "radius": 0.1
+        - "center": [-0.0, -0.197, 0.418]
+          "radius": 0.1
+        - "center": [-0.0, -0.197, 0.558]
+          "radius": 0.1
+
+      link_3:
+        - "center": [0.0, 0.0, 0.0]
+          "radius": 0.1
+        - "center": [0.052, 0.0, 0.0]
+          "radius": 0.1
+      link_4:
+        - "center": [-0.332, -0.0, -0.0]
+          "radius": 0.06
+        - "center": [0.0, 0.0, 0.0]
+          "radius": 0.06
+        - "center": [-0.266, -0.0, -0.0]
+          "radius": 0.06
+        - "center": [-0.199, -0.0, -0.0]
+          "radius": 0.06
+        - "center": [-0.133, -0.0, -0.0]
+          "radius": 0.06
+        - "center": [-0.066, -0.0, -0.0]
+          "radius": 0.06
+      link_5: 
+        - "center": [0.019, 0.009, -0.006]
+          "radius": 0.025
+      link_6: 
+        - "center": [-0.028, -0.0, 0.0]
+          "radius": 0.025
+
+    collision_sphere_buffer: 0.002
+    extra_collision_spheres: {}
+    self_collision_ignore: {
+      "link_1": ["base_link","link_2"],
+      "link_2": ["link_1", "link_3"],
+      "link_3": ["link_2", "link_4"],
+      "link_4": ["link_3","link_5"],
+      "link_5": ["link_4", "link_6"],
+      "link_6": ["link_5"],
+
+      
+      }
+    self_collision_buffer: {
+      'link_1': 0.02,
+      'link_2': 0.02, 
+      'link_3': 0.02, 
+      'link_4': 0.02,
+      'link_5' : 0.02,
+      'link_6' : 0.02,
+      } 
+      
+    use_global_cumul: True
+    mesh_link_names: ['link_1','link_2', 'link_3', 'link_4', 
+    'link_5' ,'link_6']  # List[str]
+
+    cspace:
+      joint_names: ['J1','J2', 'J3','J4' ,'J5', 'J6'
+      ]
+      retract_config:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      null_space_weight:  [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+      cspace_distance_weight: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+      max_jerk: 500.0
+      max_acceleration: 12.0
+      position_limit_clip: 0.1
+      
+      
+      

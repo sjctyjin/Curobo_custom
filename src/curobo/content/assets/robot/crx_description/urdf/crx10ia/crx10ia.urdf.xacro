@@ -1,0 +1,220 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:macro name="crx10ia" 
+              params="robot_ip:='10.11.31.121'
+              read_only:='false' 
+              use_rmi:='false' 
+              use_mock_hardware:=false 
+              gz:=false">
+
+    
+    <xacro:if value="${gz}">
+      <xacro:include filename="$(find crx_description)/urdf/crx.gazebo.xacro" />  
+      <xacro:crx_ros2_control_gazebo />
+    </xacro:if> 
+
+    <xacro:unless value="${gz}">
+      <xacro:include filename="$(find crx_description)/urdf/crx.ros2_control.xacro" />
+      <xacro:crx_ros2_control name="crx10ia" 
+                use_mock_hardware="${use_mock_hardware}" 
+                robot_ip="${robot_ip}"
+                read_only="${read_only}"
+                use_rmi="${use_rmi}" />
+    </xacro:unless> 
+
+    <material name="black">
+      <color rgba="0 0 0 1.0"/>
+    </material>
+    <material name="white">
+      <color rgba="1.0 1.0 1.0 1.00"/>
+    </material>
+
+    <!-- links -->
+    <link name="base_link">
+      <visual>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+      	  <mesh filename="package://crx_description/meshes/crx10ia/visual/link_base.stl" scale="0.001 0.001 0.001"/>
+      	</geometry>
+      	<material name="black"/>
+      </visual>
+      <collision>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+      	  <mesh filename="package://crx_description/meshes/crx10ia/collision/link_base.stl" scale="0.001 0.001 0.001"/>
+      	</geometry>
+      </collision>
+    </link>
+
+    <link name="link_1">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+	       <geometry>
+	         <mesh filename="package://crx_description/meshes/crx10ia/visual/link_1.stl" scale="0.001 0.001 0.001"/>
+    	   </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    	  <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="link_2">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/visual/link_2.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_2.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="link_3">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/visual/link_3.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_3.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="link_4">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/visual/link_4.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_4.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="link_5">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/visual/link_5.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_5.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="link_6">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/visual/link_6.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://crx_description/meshes/crx10ia/collision/link_6.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- joints -->
+    <joint name="J1" type="revolute">
+      <origin xyz="0 0 0.1277" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="link_1"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-190 * pi / 180}" upper="${190 * pi / 180}" effort="0" velocity="${120 * pi / 180}"/>
+    </joint>
+
+    <joint name="J2" type="revolute">
+      <origin xyz="0 0 0.1173" rpy="0 0 0"/>
+      <parent link="link_1"/>
+      <child link="link_2"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${-180 * pi / 180}" upper="${180 * pi / 180}" effort="0" velocity="${120 * pi / 180}"/>
+    </joint>
+
+    <joint name="J3" type="revolute">
+      <origin xyz="0 0 0.540" rpy="0 0 0"/>
+      <parent link="link_2"/>
+      <child link="link_3"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="${-285 * pi / 180}" upper="${285 * pi / 180}" effort="0" velocity="${180 * pi / 180}"/>
+    </joint>
+
+    <joint name="J4" type="revolute">
+      <origin xyz="0.540 0 0" rpy="0 0 0"/>
+      <parent link="link_3"/>
+      <child link="link_4"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="${-190 * pi / 180}" upper="${190 * pi / 180}" effort="0" velocity="${180 * pi / 180}"/>
+    </joint>
+
+    <joint name="J5" type="revolute">
+      <origin xyz="0 -0.150 0" rpy="0 0 0"/>
+      <parent link="link_4"/>
+      <child link="link_5"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="${-180 * pi / 180}" upper="${180 * pi / 180}" effort="0" velocity="${180 * pi / 180}"/>
+    </joint>
+
+    <joint name="J6" type="revolute">
+      <origin xyz="0.160 0 0" rpy="0 0 0"/>
+      <parent link="link_5"/>
+      <child link="link_6"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="${-225 * pi / 180}" upper="${225 * pi / 180}" effort="0" velocity="${180 * pi / 180}"/>
+    </joint>
+    
+    <!-- fanuc world -->
+    <link name="fanuc_world" />
+    <joint name="base_link-fanuc_world" type="fixed">
+      <origin xyz="0 0 0.245" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="fanuc_world"/>
+    </joint>
+
+    <!-- flange -->
+    <link name="flange" />
+    <joint name="J6-flange" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="link_6" />
+      <child link="flange" />
+    </joint>
+    
+    <!-- tcp -->
+    <link name="tcp" />
+    <joint name="flange-tcp" type="fixed">
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <parent link="flange" />
+      <child link="tcp" />
+    </joint>
+    
+  </xacro:macro>
+</robot>

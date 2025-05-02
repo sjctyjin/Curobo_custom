@@ -7,8 +7,10 @@ import torch
 import argparse
 import os
 import time
-
+import pyodbc  # Added for SQL database connectivity
+import numpy as np
 from omni.isaac.kit import SimulationApp
+
 
 # 初始化解析參數
 parser = argparse.ArgumentParser()
@@ -41,6 +43,10 @@ from curobo.wrap.reacher.motion_gen import MotionGen, MotionGenConfig, MotionGen
 from curobo.types.base import TensorDeviceType
 from curobo.types.math import Pose
 from curobo.types.robot import JointState
+from scipy.spatial.transform import Rotation as R
+
+from curobo.types.robot import RobotConfig
+from curobo.cuda_robot_model.cuda_robot_model import CudaRobotModel
 
 # ===== 工具函數 =====
 def safe_join_path(path1, path2):
@@ -48,15 +54,63 @@ def safe_join_path(path1, path2):
         raise ValueError("join_path的第二個參數不能是dict! 應該是檔名字串。")
     return os.path.normpath(os.path.join(path1, path2))
 
+# ===== SQL連接函數 =====
+def connect_sql():
+    # 定義連接字符串
+    conn = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};'  # 驅動程式名稱
+        'SERVER=192.168.3.105;'  # 資料庫伺服器的 IP 地址或名稱
+        'DATABASE=Fanuc;'  # 資料庫名稱
+        'UID=sa;'  # 使用者名稱
+        'PWD=pass;'  # 密碼
+    )
+    return conn
+
+# ===== 更新SQL資料庫中的關節數值 =====
+def update_joint_values_in_db(conn, joint_values):
+    # 將關節值轉換為角度
+    joint_angles = np.degrees(joint_values)
+    
+    # 準備SQL更新語句，參考Fanuc_description.py中的格式
+    sql = f"""UPDATE PR_Status 
+             SET X_J1 = '{round(joint_angles[0], 2)}',
+                 Y_J2 = '{round(joint_angles[1], 2)}',
+                 Z_J3 = '{round(joint_angles[2] - joint_angles[1], 2)}',
+                 W_J4 = '{round(joint_angles[3], 2)}',
+                 P_J5 = '{round(joint_angles[4], 2)}',
+                 R_J6 = '{round(joint_angles[5], 2)}',
+                 move = '1',
+                 moveType = 'joint',
+                 time = '{time.strftime('%Y-%m-%d %H:%M:%S')}'
+             WHERE PR_No = 'PR[4]'"""
+             
+    # 執行SQL更新
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        conn.commit()
+    except Exception as e:
+        print(f"更新SQL資料庫時出錯: {e}")
+        conn.rollback()
+
 # ===== 主程式 =====
 def main():
+    # 連接SQL資料庫
+    sql_conn = None
+    try:
+        sql_conn = connect_sql()
+        print("SQL資料庫連接成功")
+    except Exception as e:
+        print(f"連接SQL資料庫時出錯: {e}")
+        print("繼續執行程式，但不會更新SQL資料庫")
+
     my_world = World(stage_units_in_meters=1.0)
     stage = my_world.stage
     xform = stage.DefinePrim("/World", "Xform")
     stage.SetDefaultPrim(xform)
     stage.DefinePrim("/curobo", "Xform")
 
-    target = cuboid.VisualCuboid("/World/target", position=np.array([0.5, 0, 0.5]), orientation=np.array([0.737,0,0.676,0]), color=np.array([1,0,0]), size=0.05)
+    target = cuboid.VisualCuboid("/World/target", position=np.array([0.5, 0, 0.5]), orientation=np.array([0,1,0,0]), color=np.array([1,0,0]), size=0.05)
 
     setup_curobo_logger("warn")
     usd_help = UsdHelper()
@@ -105,12 +159,25 @@ def main():
     print("warming up...")
     motion_gen.warmup(enable_graph=True)
     print("Curobo is Ready")
+    # 正向運動學計算URDF Load
+    urdf_file_FK = "C:/Users/User/Downloads/isaac-sim-4.2/curobo/src/curobo/content/assets/robot/crx_description/crx10ia_l.xx.urdf"
+    base_link_FK = "link_2"
+    ee_link_FK   = "link_6"
+
+    FK_robot_cfg = RobotConfig.from_basic(
+        urdf_file_FK, base_link_FK, ee_link_FK, tensor_args
+    )
+    kin_model = CudaRobotModel(FK_robot_cfg.kinematics)
+
 
     articulation_controller = None
     past_pose = None
     cmd_plan = None
     cmd_idx = 0
     i = 0
+    
+    # 記錄上一次的關節角度，用於比較是否有變化
+    last_joint_positions = None
     
     # 等待物理引擎完全初始化
     for _ in range(5):
@@ -181,7 +248,21 @@ def main():
                 # 等待一下再尝试
                 time.sleep(0.1)
                 continue
+            # print("關節當前狀態 : ",sim_js.positions)
+            q = torch.tensor([sim_js.positions], device='cuda:0')
+            state = kin_model.get_state(q)
+            quat = state.ee_quaternion[0].cpu().numpy()
+            # 注意順序從 [w, x, y, z] → [x, y, z, w]
+            r = R.from_quat([quat[1], quat[2], quat[3], quat[0]])
 
+            # 轉成 ZYX 尤拉角（以角度為單位）
+            euler = r.as_euler('zyx', degrees=True)
+
+            print("==========")
+            print("輸出座標 : ",state.ee_position,"\n輸出姿態 : ",euler )
+            print("==========")
+            
+            sim_js.positions[2] = sim_js.positions[2]+sim_js.positions[3]
             # 处理关节状态
             cu_js = JointState(
                 position=tensor_args.to_device(sim_js.positions),
@@ -201,7 +282,7 @@ def main():
             # 如果目标位置变化，计划新路径
             if np.linalg.norm(cube_position - past_pose) > 1e-3:
                 ik_goal = Pose(position=tensor_args.to_device(cube_position), quaternion=tensor_args.to_device(cube_orientation))
-                plan_config = MotionGenPlanConfig(enable_graph=True,max_attempts=20)
+                plan_config = MotionGenPlanConfig(enable_graph=False)
                 result = motion_gen.plan_single(cu_js.unsqueeze(0), ik_goal, plan_config)
 
                 if result.success.item():
@@ -217,14 +298,50 @@ def main():
             if cmd_plan is not None and cmd_idx < len(cmd_plan.position) and articulation_controller is not None:
                 try:
                     cmd_state = cmd_plan[cmd_idx]
+                    print("關節參數1 : ",cmd_state[1].position.item())
+                    print("關節參數2 : ",cmd_state[2].position.item())
+                    # cmd_state[6] = 0.35
+                    # cmd_state[2].position = torch.tensor(cmd_state[1].position.item()+cmd_state[2].position.item(), device='cuda:0')
+                    # cmd_state[2].position.fill_(cmd_state[1].position.item()+cmd_state[2].position.item())
+                    print("修改後 - 關節參數 : ",cmd_state[2].position)
                     art_action = ArticulationAction(cmd_state.position.cpu().numpy(), joint_indices=idx_list)
                     articulation_controller.apply_action(art_action)
+                    
+                    # 將當前關節數值更新到SQL資料庫中
+                    current_joint_positions = cmd_state.position.cpu().numpy()
+                    
+                    # 只在關節數值有明顯變化時才更新資料庫
+                    if (last_joint_positions is None or 
+                        np.any(np.abs(current_joint_positions - last_joint_positions) > 0.01)):
+                        if sql_conn is not None:
+                            update_joint_values_in_db(sql_conn, current_joint_positions)
+                        last_joint_positions = current_joint_positions
+                    # 1. 計算 Link_6 相對於 Link_1 的位姿
+
+                    q = torch.tensor([sim_js.positions], device='cuda:0')
+                    state = kin_model.get_state(q)
+                    quat = state.ee_quaternion[0].cpu().numpy()
+                    # 注意順序從 [w, x, y, z] → [x, y, z, w]
+                    r = R.from_quat([quat[1], quat[2], quat[3], quat[0]])
+
+                    # 轉成 ZYX 尤拉角（以角度為單位）
+                    euler = r.as_euler('xyz', degrees=True)
+
+                    print("==========")
+                    print("輸出座標 : ",state.ee_position,"\n輸出姿態 : ",euler )
+                    print("==========")
+                        
                     cmd_idx += 1
                 except Exception as e:
                     print(f"应用关节动作时出错: {e}")
                     
         except Exception as e:
             print(f"主循环中出错: {e}")
+
+    # 關閉SQL連接
+    if sql_conn is not None:
+        sql_conn.close()
+        print("SQL資料庫連接已關閉")
 
     simulation_app.close()
 

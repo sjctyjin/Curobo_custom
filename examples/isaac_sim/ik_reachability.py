@@ -305,6 +305,7 @@ def main():
         goal_pose = fk_state.ee_pose
         goal_pose = goal_pose.repeat(position_grid_offset.shape[0])
         goal_pose.position += position_grid_offset
+        print("goal_pose : ",goal_pose  )
 
         # 预热IK求解器
         print("预热IK求解器...")
@@ -469,8 +470,12 @@ def main():
                 ):
                     try:
                         # 设置末端执行器目标
+
                         ee_translation_goal = cube_position
-                        ee_orientation_teleop_goal = cube_orientation
+
+                        ee_orientation_teleop_goal = [0.560, 0.000, 0.829, -0.000]#cube_orientation
+
+                        print("末端由拉腳 : ",ee_orientation_teleop_goal)
 
                         # 计算CuRobo解决方案
                         ik_goal = Pose(
