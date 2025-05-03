@@ -34,7 +34,10 @@ echo $env:CUDA_HOME
 # CUDA 11.8
 pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
 安裝isaac sim
+
+pip install isaacsim==4.2.0.2 --extra-index-url https://pypi.nvidia.com
 pip install isaacsim-extscache-physics==4.2.0.2 isaacsim-extscache-kit==4.2.0.2 isaacsim-extscache-kit-sdk==4.2.0.2 --extra-index-url https://pypi.nvidia.com
+
 6.確認C++編譯環境是VS2022 MSVC (14.42) v142
 
 開啟Visual Studio 2022/2019 installer
