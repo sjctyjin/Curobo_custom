@@ -50,6 +50,8 @@ pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https
 6. 執行curobo安裝
 cd curobo
 python -m pip install -e .[isaacsim] --no-build-isolation
+如果執行上面那段出錯
+先執行 :  pip install wheel 後 在執行上面那段一次
 # 執行範例
 # IK碰撞球範圍 https://curobo.org/get_started/2b_isaacsim_examples.html
 
