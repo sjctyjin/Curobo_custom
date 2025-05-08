@@ -33,11 +33,11 @@ robot_cfg:
     # }
     usd_flip_joint_limits: []
 
-    urdf_path: "robot/piper_description/piper_description.urdf"
+    urdf_path: "robot/piper_description/piper_description_d435.urdf"
     asset_root_path: "robot/piper_description"
     
     base_link: "base_link"
-    ee_link: "link7"
+    ee_link: "link6"
     #link_names: null
     lock_joints: {"joint7": 0.0}
     extra_links: null
