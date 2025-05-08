@@ -284,12 +284,12 @@
   </joint>
   <link name="link7">
     <inertial>
-      <origin rpy="0 0 0" xyz="0.00065123185041968 -0.0491929869131989 0.00972258769184025"/>
+      <origin rpy="1.5708 0 0" xyz="0.00065123185041968 -0.0491929869131989 0.00972258769184025"/>
       <mass value="0.025"/>
       <inertia ixx="0.00007371" ixy="-0.00000113" ixz="0.00000021" iyy="-0.00000113" iyz="-0.00001372" izz="0.0000747"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://piper_description/meshes/link7.STL"/>
       </geometry>
@@ -298,18 +298,18 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://piper_description/meshes/link7.STL"/>
       </geometry>
     </collision>
   </link>
   <joint name="joint7" type="prismatic">
-    <origin rpy="1.5708 0 0" xyz="0 0 0.1358"/>
+    <origin rpy="0 0 0" xyz="0 0 0.1358"/>
     <parent link="gripper_base"/>
     <child link="link7"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="10" lower="0" upper="0.09" velocity="1"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" lower="-0.09" upper="0.0" velocity="1"/>
   </joint>
   <link name="link8">
     <inertial>
