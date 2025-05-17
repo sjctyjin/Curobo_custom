@@ -473,7 +473,7 @@ def main():
 
                         ee_translation_goal = cube_position
 
-                        ee_orientation_teleop_goal = [0.560, 0.000, 0.829, -0.000]#cube_orientation
+                        ee_orientation_teleop_goal = [ 0.459, 0.523, 0.568, -0.440]#cube_orientation
 
                         print("末端由拉腳 : ",ee_orientation_teleop_goal)
 

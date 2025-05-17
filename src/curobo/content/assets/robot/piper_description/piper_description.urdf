@@ -385,7 +385,7 @@
     <inertial>
       <origin
         xyz="0.00065123185041968 -0.0491929869131989 0.00972258769184025"
-        rpy="0 0 0" />
+        rpy="1.5708 0 0" />
       <mass
         value="0.025" />
       <inertia
@@ -399,7 +399,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="1.5708 0 0" />
       <geometry>
         <mesh
           filename="meshes/link7.STL" />
@@ -413,7 +413,7 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="1.5708 0 0" />
       <geometry>
         <mesh
           filename="meshes/link7.STL" />
@@ -425,16 +425,16 @@
     type="prismatic">
     <origin
       xyz="0 0 0.1358"
-      rpy="1.5708 0 0" />
+      rpy="0 0 0" />
     <parent
       link="gripper_base" />
     <child
       link="link7" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 1 0" />
     <limit
-      lower="0"
-      upper="0.035"
+      lower="-0.035"
+      upper="0.0"
       effort="10"
       velocity="1" />
   </joint>

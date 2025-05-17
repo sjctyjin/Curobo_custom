@@ -56,7 +56,10 @@ def main():
     stage.SetDefaultPrim(xform)
     stage.DefinePrim("/curobo", "Xform")
 
-    target = cuboid.VisualCuboid("/World/target", position=np.array([0.5, 0, 0.5]), orientation=np.array([0.737,0,0.676,0]), color=np.array([1,0,0]), size=0.05)
+    # target = cuboid.VisualCuboid("/World/target", position=np.array([-0.000, 0.321,  0.200]), orientation=np.array([0.143, -0.631, 0.753, 0.116]), color=np.array([1,0,0]), size=0.05)
+    # target = cuboid.VisualCuboid("/World/target", position=np.array([-0.000, 0.321,  0.200]), orientation=np.array([-0.000,-0.004, -0.000, 1.000]), color=np.array([1,0,0]), size=0.05)
+
+    target = cuboid.VisualCuboid("/World/target", position=np.array([-0.000, 0.321,  0.200]), orientation=np.array([-0.001,1.000, 0.000, 0.004,]), color=np.array([1,0,0]), size=0.05)
 
     setup_curobo_logger("warn")
     usd_help = UsdHelper()
@@ -134,7 +137,8 @@ def main():
                 robot._articulation_view.set_max_efforts(values=np.array([5000] * len(idx_list)), joint_indices=idx_list)
     except Exception as e:
         print(f"初始化机器人姿态出错: {e}")
-
+    if args.robot == "piper.yml":#將piper的joint8除去
+        robot.dof_names.pop()
     # 主循环
     while simulation_app.is_running():
         try:
@@ -181,7 +185,7 @@ def main():
                 # 等待一下再尝试
                 time.sleep(0.1)
                 continue
-
+            # print("關節處理 : ",robot.dof_names)
             # 处理关节状态
             cu_js = JointState(
                 position=tensor_args.to_device(sim_js.positions),
@@ -191,23 +195,32 @@ def main():
                 joint_names=robot.dof_names
             )
             cu_js = cu_js.get_ordered_joint_state(motion_gen.kinematics.joint_names)
-
+            
             # 获取目标立方体位置
             cube_position, cube_orientation = target.get_world_pose()
-
+            
             if past_pose is None:
                 past_pose = cube_position
 
             # 如果目标位置变化，计划新路径
             if np.linalg.norm(cube_position - past_pose) > 1e-3:
+                #print("關節 : ",idx_list)
                 ik_goal = Pose(position=tensor_args.to_device(cube_position), quaternion=tensor_args.to_device(cube_orientation))
                 plan_config = MotionGenPlanConfig(enable_graph=True,max_attempts=20)
+                
                 result = motion_gen.plan_single(cu_js.unsqueeze(0), ik_goal, plan_config)
 
+                if not result.success:
+                    print("軌跡規劃失敗  ---------------- ")
+
                 if result.success.item():
+                    print("起始座標 : ",cu_js.unsqueeze(0))
+                    print("末端座標 : ",ik_goal)
                     cmd_plan = result.get_interpolated_plan()
                     cmd_plan = motion_gen.get_full_js(cmd_plan)
                     idx_list = [robot.get_dof_index(x) for x in robot.dof_names if x in cmd_plan.joint_names]
+                    print("關節2 : ",robot.dof_names)
+                    
                     cmd_plan = cmd_plan.get_ordered_joint_state(robot.dof_names)
                     cmd_idx = 0
 
@@ -216,6 +229,7 @@ def main():
             # 执行计划的动作
             if cmd_plan is not None and cmd_idx < len(cmd_plan.position) and articulation_controller is not None:
                 try:
+                    
                     cmd_state = cmd_plan[cmd_idx]
                     art_action = ArticulationAction(cmd_state.position.cpu().numpy(), joint_indices=idx_list)
                     articulation_controller.apply_action(art_action)

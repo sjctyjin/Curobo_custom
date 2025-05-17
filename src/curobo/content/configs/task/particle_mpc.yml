@@ -29,9 +29,17 @@ model:
 
 cost:
   pose_cfg:
+    # —— 1. 单维度误差权重 ——  
+    #    前 3 个数是位置 (x,y,z)，后 3 个是姿态 (roll,pitch,yaw)
+    #    你可以把后 3 个数调大，比如调成 10.0
     vec_weight: [1.0,1.0, 1.0, 1.0, 1.0, 1.0]
     run_vec_weight: [1.0,1.0, 1.0, 1.0, 1.0, 1.0]
-    weight: [60,300.0,20,20] #[150.0, 2000.0, 30, 40]
+    #weight: [60,300.0,20,20] #[150.0, 2000.0, 30, 40]
+    # —— 2. 整体 Pose Cost 权重 ——  
+    #    第一位是 pose_cfg 的综合权重，第二位是 cspace，……
+    #    如果你想更强调姿态，可以把 pose_cfg(第一位)调大一些
+    #    （这里示范把 60 调成 150）
+    weight: [60,300.0,20,20]  
     vec_convergence: [0.0, 0.00] # orientation, position
     terminal: True
     run_weight: 1.0
