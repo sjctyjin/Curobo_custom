@@ -71,6 +71,7 @@ python examples/isaac_sim/mpc_example.py --robot piper.yml --visualize_spheres
 python examples/isaac_sim/mpc_example.py --robot cr10_ial.yml --visualize_spheres
 # MPC軌跡規劃 發布關節值到ROS2主機
 python examples/isaac_sim/mpc_example.py --robot piper.yml --enable_rosbridge --rosbridge_host 192.168.3.125
+python examples/isaac_sim/mpc_example_sql.py --robot cr10_ial.yml --enable_rosbridge 
 
 ```
 
